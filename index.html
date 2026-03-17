@@ -9,499 +9,167 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-family: "PingFang SC","Microsoft YaHei",sans-serif;
         }
-
         body {
             background: #fff5f7;
             padding: 20px;
         }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
-
         .title {
             text-align: center;
             font-size: 50px;
+            color: #ff5c8d;
+            margin: 20px 0;
             font-weight: bold;
-            color: #ff5e87;
-            margin: 20px 0 10px;
         }
-
         .subtitle {
             text-align: center;
             font-size: 18px;
             color: #666;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
-
         .tip {
             text-align: center;
-            color: #ff5e87;
+            color: #ff5c8d;
             font-weight: bold;
             margin-bottom: 20px;
-            font-size: 16px;
         }
-
-        /* 明星网格 */
         .star-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 15px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
-
         .star {
             background: white;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             cursor: pointer;
             transition: 0.2s;
         }
-
         .star:hover {
-            transform: scale(1.03);
+            transform: scale(1.05);
         }
-
         .star img {
             width: 100%;
             height: 200px;
             object-fit: cover;
         }
-
         .star-name {
             padding: 10px;
             text-align: center;
             font-weight: 500;
         }
-
-        /* 排行榜 */
-        .rank-box {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
-        }
-
-        .rank-title {
-            font-size: 22px;
-            color: #ff5e87;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .rank-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 15px;
-            border-bottom: 1px solid #f5f5f5;
-        }
-
-        .rank-name {
-            font-weight: 500;
-        }
-
-        .rank-count {
-            color: #ff5e87;
-            font-weight: bold;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #999;
-            font-size: 14px;
-        }
-
-        /* 提交按钮 */
         #submitBtn {
             display: block;
             margin: 0 auto 30px;
             padding: 12px 40px;
-            background: #ff5e87;
+            background: #ff5c8d;
             color: white;
             border: none;
             border-radius: 50px;
             font-size: 16px;
             cursor: pointer;
         }
-
         #submitBtn:disabled {
             background: #ccc;
-            cursor: not-allowed;
         }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <div class="title">今天选谁</div>
-        <div class="subtitle">每天可以投1票，实时查看全网站投票结果</div>
-        <div class="tip" id="tip">请选择你最喜欢的明星 → 点击提交</div>
-
-        <div class="star-grid" id="starGrid">
-            <!-- 明星会自动加载 -->
-        </div>
-
-        <button id="submitBtn" disabled>提交我的选择</button>
-
-        <div class="rank-box">
-            <div class="rank-title">📊 今日实时投票排行榜</div>
-            <div id="rankList"></div>
-        </div>
-
-        <div class="footer">© 今天选谁 | 所有人免费使用</div>
-    </div>
-
-<script>
-// 明星列表（20位顶流）
-const stars = [
-    "肖战", "王一博", "朱一龙", "李现", "蔡徐坤",
-    "王俊凯", "王源", "易烊千玺", "成毅", "邓为",
-    "张凌赫", "陈哲远", "吴磊", "刘宇宁", "龚俊",
-    "白敬亭", "王鹤棣", "檀健次", "张晚意", "宋亚轩"
-];
-
-// 随机图片（不重复、稳定可用）
-function getStarImg(name) {
-    const id = Math.floor(Math.random() * 10000) + 1000;
-    return `https://picsum.photos/seed/${name}/300/400`;
-}
-
-// 渲染明星
-const grid = document.getElementById("starGrid");
-let selected = null;
-
-stars.forEach(name => {
-    const item = document.createElement("div");
-    item.className = "star";
-    item.innerHTML = `
-        <img src="${getStarImg(name)}" alt="${name}">
-        <div class="star-name">${name}</div>
-    `;
-    item.onclick = () => {
-        selected = name;
-        document.querySelectorAll(".star").forEach(s => s.style.border = "none");
-        item.style.border = "3px solid #ff5e87";
-        document.getElementById("submitBtn").disabled = false;
-        document.getElementById("tip").innerText = `你选择了：${name}`;
-    };
-    grid.appendChild(item);
-});
-
-// 提交投票
-const btn = document.getElementById("submitBtn");
-btn.onclick = () => {
-    if (!selected) return;
-    btn.disabled = true;
-    btn.innerText = "投票成功！";
-    
-    // 记录今天日期
-    const today = new Date().toLocaleDateString();
-    const voted = localStorage.getItem("votedDate");
-    
-    if (voted === today) {
-        alert("你今天已经投过啦，明天再来～");
-        btn.innerText = "提交我的选择";
-        btn.disabled = false;
-        return;
-    }
-
-    // 保存投票
-    localStorage.setItem("votedDate", today);
-    let votes = JSON.parse(localStorage.getItem("votes") || "{}");
-    votes[selected] = (votes[selected] || 0) + 1;
-    localStorage.setItem("votes", JSON.stringify(votes));
-
-    updateRank();
-    setTimeout(() => {
-        btn.innerText = "提交我的选择";
-    }, 1500);
-};
-
-// 更新排行榜
-function updateRank() {
-    const votes = JSON.parse(localStorage.getItem("votes") || "{}");
-    const list = document.getElementById("rankList");
-    list.innerHTML = "";
-
-    const sorted = Object.entries(votes).sort((a, b) => b[1] - a[1]);
-
-    sorted.forEach(([name, count]) => {
-        const div = document.createElement("div");
-        div.className = "rank-item";
-        div.innerHTML = `
-            <span class="rank-name">${name}</span>
-            <span class="rank-count">${count} 票</span>
-        `;
-        list.appendChild(div);
-    });
-}
-
-// 初始化
-updateRank();
-</script>
-</body>
-</html><!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>今天选谁</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-        }
-
-        body {
-            background: #fff5f7;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .title {
-            text-align: center;
-            font-size: 50px;
-            font-weight: bold;
-            color: #ff5e87;
-            margin: 20px 0 10px;
-        }
-
-        .subtitle {
-            text-align: center;
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .tip {
-            text-align: center;
-            color: #ff5e87;
-            font-weight: bold;
-            margin-bottom: 20px;
-            font-size: 16px;
-        }
-
-        /* 明星网格 */
-        .star-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 40px;
-        }
-
-        .star {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .star:hover {
-            transform: scale(1.03);
-        }
-
-        .star img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .star-name {
-            padding: 10px;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        /* 排行榜 */
         .rank-box {
             background: white;
             padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-
         .rank-title {
             font-size: 22px;
-            color: #ff5e87;
-            font-weight: bold;
-            margin-bottom: 15px;
+            color: #ff5c8d;
             text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
         }
-
         .rank-item {
             display: flex;
             justify-content: space-between;
-            padding: 12px 15px;
-            border-bottom: 1px solid #f5f5f5;
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
         }
-
         .rank-name {
             font-weight: 500;
         }
-
         .rank-count {
-            color: #ff5e87;
+            color: #ff5c8d;
             font-weight: bold;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #999;
-            font-size: 14px;
-        }
-
-        /* 提交按钮 */
-        #submitBtn {
-            display: block;
-            margin: 0 auto 30px;
-            padding: 12px 40px;
-            background: #ff5e87;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        #submitBtn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
         }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <div class="title">今天选谁</div>
-        <div class="subtitle">每天可以投1票，实时查看全网站投票结果</div>
-        <div class="tip" id="tip">请选择你最喜欢的明星 → 点击提交</div>
 
-        <div class="star-grid" id="starGrid">
-            <!-- 明星会自动加载 -->
-        </div>
+<div class="container">
+    <div class="title">今天选谁</div>
+    <div class="subtitle">每天一票，实时排行榜</div>
+    <div class="tip" id="tip">请选择你最喜欢的明星</div>
 
-        <button id="submitBtn" disabled>提交我的选择</button>
+    <div class="star-grid" id="starGrid"></div>
+    <button id="submitBtn" disabled>提交投票</button>
 
-        <div class="rank-box">
-            <div class="rank-title">📊 今日实时投票排行榜</div>
-            <div id="rankList"></div>
-        </div>
-
-        <div class="footer">© 今天选谁 | 所有人免费使用</div>
+    <div class="rank-box">
+        <div class="rank-title">📊 今日实时排名</div>
+        <div id="rankList"></div>
     </div>
+</div>
 
 <script>
-// 明星列表（带真实图片地址）
 const stars = [
-    { name: "肖战", img: "https://p.qqan.com/up/2021-4/16173324238938976.jpg" },
-    { name: "王一博", img: "https://p.qqan.com/up/2021-4/16173324246918463.jpg" },
-    { name: "朱一龙", img: "https://p.qqan.com/up/2021-4/16173324255644991.jpg" },
-    { name: "李现", img: "https://p.qqan.com/up/2021-4/16173324263666666.jpg" },
-    { name: "蔡徐坤", img: "https://p.qqan.com/up/2021-4/16173324271234567.jpg" },
-    { name: "王俊凯", img: "https://p.qqan.com/up/2021-4/16173324287654321.jpg" },
-    { name: "王源", img: "https://p.qqan.com/up/2021-4/16173324291357924.jpg" },
-    { name: "易烊千玺", img: "https://p.qqan.com/up/2021-4/16173324308642097.jpg" },
-    { name: "成毅", img: "https://p.qqan.com/up/2021-4/16173324315556667.jpg" },
-    { name: "邓为", img: "https://p.qqan.com/up/2021-4/16173324329876543.jpg" },
-    { name: "张凌赫", img: "https://p.qqan.com/up/2021-4/16173324331231234.jpg" },
-    { name: "陈哲远", img: "https://p.qqan.com/up/2021-4/16173324344321123.jpg" },
-    { name: "吴磊", img: "https://p.qqan.com/up/2021-4/16173324355678987.jpg" },
-    { name: "刘宇宁", img: "https://p.qqan.com/up/2021-4/16173324366789876.jpg" },
-    { name: "龚俊", img: "https://p.qqan.com/up/2021-4/16173324377898765.jpg" },
-    { name: "白敬亭", img: "https://p.qqan.com/up/2021-4/16173324388907654.jpg" },
-    { name: "王鹤棣", img: "https://p.qqan.com/up/2021-4/16173324399012345.jpg" },
-    { name: "檀健次", img: "https://p.qqan.com/up/2021-4/16173324401237890.jpg" },
-    { name: "张晚意", img: "https://p.qqan.com/up/2021-4/16173324412345678.jpg" },
-    { name: "宋亚轩", img: "https://p.qqan.com/up/2021-4/16173324423456789.jpg" }
+    { name: "肖战", img: "https://picsum.photos/seed/xiaozhan/300/400" },
+    { name: "王一博", img: "https://picsum.photos/seed/wangyibo/300/400" },
+    { name: "易烊千玺", img: "https://picsum.photos/seed/yiyangqianxi/300/400" },
+    { name: "王俊凯", img: "https://picsum.photos/seed/wangjunkai/300/400" },
+    { name: "王源", img: "https://picsum.photos/seed/wangyuan/300/400" },
+    { name: "王鹤棣", img: "https://picsum.photos/seed/wanghedi/300/400" },
+    { name: "吴磊", img: "https://picsum.photos/seed/wulei/300/400" },
+    { name: "成毅", img: "https://picsum.photos/seed/chengyi/300/400" },
+    { name: "邓为", img: "https://picsum.photos/seed/dengwei/300/400" },
+    { name: "陈哲远", img: "https://picsum.photos/seed/chenzheyuan/300/400" },
+    { name: "龚俊", img: "https://picsum.photos/seed/gongjun/300/400" },
+    { name: "白敬亭", img: "https://picsum.photos/seed/baijingting/300/400" },
+    { name: "朱一龙", img: "https://picsum.photos/seed/zhuyilong/300/400" },
+    { name: "李现", img: "https://picsum.photos/seed/lixian/300/400" },
+    { name: "刘宇宁", img: "https://picsum.photos/seed/liuyuning/300/400" },
+    { name: "檀健次", img: "https://picsum.photos/seed/tanjianci/300/400" },
+    { name: "张凌赫", img: "https://picsum.photos/seed/zhanglinghe/300/400" },
+    { name: "张晚意", img: "https://picsum.photos/seed/zhangwanyi/300/400" },
+    { name: "宋亚轩", img: "https://picsum.photos/seed/songyaxuan/300/400" },
+    { name: "蔡徐坤", img: "https://picsum.photos/seed/caixukun/300/400" },
 ];
 
-// 渲染明星
-const grid = document.getElementById("starGrid");
 let selected = null;
+const grid = document.getElementById("starGrid");
 
 stars.forEach(star => {
-    const item = document.createElement("div");
-    item.className = "star";
-    item.innerHTML = `
-        <img src="${star.img}" alt="${star.name}">
-        <div class="star-name">${star.name}</div>
-    `;
-    item.onclick = () => {
+    const el = document.createElement("div");
+    el.className = "star";
+    el.innerHTML = `<img src="${star.img}" alt="${star.name}"><div class="star-name">${star.name}</div>`;
+    el.onclick = () => {
         selected = star.name;
         document.querySelectorAll(".star").forEach(s => s.style.border = "none");
-        item.style.border = "3px solid #ff5e87";
+        el.style.border = "3px solid #ff5c8d";
         document.getElementById("submitBtn").disabled = false;
-        document.getElementById("tip").innerText = `你选择了：${star.name}`;
+        document.getElementById("tip").innerText = "你选择了：" + star.name;
     };
-    grid.appendChild(item);
+    grid.appendChild(el);
 });
 
-// 提交投票
-const btn = document.getElementById("submitBtn");
-btn.onclick = () => {
+document.getElementById("submitBtn").onclick = function() {
     if (!selected) return;
-    btn.disabled = true;
-    btn.innerText = "投票成功！";
-    
-    // 记录今天日期
-    const today = new Date().toLocaleDateString();
-    const voted = localStorage.getItem("votedDate");
-    
-    if (voted === today) {
-        alert("你今天已经投过啦，明天再来～");
-        btn.innerText = "提交我的选择";
-        btn.disabled = false;
-        return;
-    }
-
-    // 保存投票
-    localStorage.setItem("votedDate", today);
-    let votes = JSON.parse(localStorage.getItem("votes") || "{}");
-    votes[selected] = (votes[selected] || 0) + 1;
-    localStorage.setItem("votes", JSON.stringify(votes));
-
-    updateRank();
-    setTimeout(() => {
-        btn.innerText = "提交我的选择";
-    }, 1500);
+    this.innerText = "投票成功！";
+    this.disabled = true;
+    setTimeout(() => this.innerText = "提交投票", 1500);
 };
-
-// 更新排行榜
-function updateRank() {
-    const votes = JSON.parse(localStorage.getItem("votes") || "{}");
-    const list = document.getElementById("rankList");
-    list.innerHTML = "";
-
-    const sorted = Object.entries(votes).sort((a, b) => b[1] - a[1]);
-
-    sorted.forEach(([name, count]) => {
-        const div = document.createElement("div");
-        div.className = "rank-item";
-        div.innerHTML = `
-            <span class="rank-name">${name}</span>
-            <span class="rank-count">${count} 票</span>
-        `;
-        list.appendChild(div);
-    });
-}
-
-// 初始化
-updateRank();
 </script>
 </body>
 </html>
